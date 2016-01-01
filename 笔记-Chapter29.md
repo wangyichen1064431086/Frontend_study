@@ -4,7 +4,7 @@
 
 属性|说明|返回
 ----|----|----
-document.stylesheets|返回样式表的集合|CSSStyleSheet[]
+document.styleSheets|返回样式表的集合|CSSStyleSheet[]
 
 - 一个CSSStyleSheet对象代表了一个样式表，它提供了一组属性和方法来操作文档里的样式。
 
@@ -12,6 +12,15 @@ CSSStyleSheet对象的成员
 
 成员|说明|返回
 ----|----|----
+cssRules|返回一个CSSRuleList对象，代表样式表里的各种样式|CSSRuleList
+deleteRule(<pos>)|从样式表中移除一条规则|void
+disabled|获取或设置样式表的禁用状态|布尔值
+href|返回链接样式表的href|字符串
+insertRule(<rule>,<pos>)|插入一条新规则到样式表中|数值
+media|返回应用到样式表上的媒介限制集合|MediaList
+ownerNode|返回样式所定义的元素|HTMLElement
+title|返回title属性的值|字符串
+type|返回type属性的值|字符串
 
 ## 29.1.1获得样式表的基本信息
 ### eg1 使用CSSStyleSheet对象的属性来获取样式表的基本信息 ***Good!增加表格元素记录信息的方式***
@@ -109,6 +118,15 @@ CSSStyleSheet对象的成员
 
 ## 29.1.2使用媒介限制
 - CSSStyleSheet.media属性：返回一个MediaList对象。定义样式表是可以使用media属性类限制样式应用的场合。
+MediaList对象的成员
+
+成员|说明|返回
+----|----|-----
+appendMedium(<medium>)|添加一个新媒介到列表中|void
+deleteMedium(<medium>)|从列表中移除一个媒介|void
+item(<pos>)|返回指定索引的媒介|字符串
+length|返回媒介的数量|数值
+mediaText|返回media属性的文本值|字符串
 
 ### eg:使用MediaList对象
 (书29-2)
@@ -796,7 +814,7 @@ CSSStyelRule|代表样式表中的样式集合中的一条样式|document.styleS
 </html>
 ```
 
-## 29.3.3使用细粒度的CSS DOM对象
+## 29.3.3使用细粒度的CSS DOM对象 ***很多函数方法浏览器不支持，不用看了***
 eg1:使用CSSPrimitiveValue对象
 （书29-10）有错误，说“无style.getPropertyCSSValue()函数”
 ```

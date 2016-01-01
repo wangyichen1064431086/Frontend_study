@@ -1,7 +1,7 @@
 # Chapter30 使用事件
 ## 30.1 使用简单事件处理器
-- 处理事件的最直接方式是：用事件属性创建一个简单事件处理器
-- 每个事件都对应一个事件属性，如mouseover事件——onmouseover属性：光标移动至元素占据的屏幕区域上方出发；
+- 处理事件的最直接方式是：用**事件属性**创建一个简单事件处理器
+- 每个事件都对应一个事件属性，如mouseover事件——onmouseover属性：光标移动至元素占据的屏幕区域上方触发；
 - 事件是成双成对的，mouseover事件和mouseout事件相对
 
 ## 30.1.1实现简单的内联事件处理器
@@ -75,7 +75,7 @@
 
 <body>
     <p onmouseover="handleMouseOver(this)" onmouseout="handleMouseOut(this)">
-        <!-- 特殊值this指的是触发事件的元素-->
+        <!-- 特殊值this指的是触发事件的元素 ,此处调用函数可以不打引号-->
         There are lots of different kinds of fruit- there are over 500 varieties of banana alone.
     </p>
     <p onmouseover="handleMouseOver(this)" onmouseout="handleMouseOut(this)">
@@ -85,6 +85,32 @@
 
 </body>
 </html>
+```
+- 自己重写的：
+```
+<head>
+  .....
+ <script type="text/javascript">
+        function mouseover(element) {
+            element.style.color='black';
+            element.style.background='white';
+        }
+        function mouseout(element) {
+            element.style.removeProperty("color");
+            element.style.removeProperty("background");
+        }
+    </script>
+</head>
+
+<body>
+    <p onmouseover=mouseover(this) onmouseout=mouseout(this)>
+        <!-- 特殊值this指的是触发事件的元素-->
+        There are lots of different kinds of fruit- there are over 500 varieties of banana alone.
+    </p>
+    <p onmouseover=mouseover(this) onmouseout=mouseout(this)>
+        One of the most interesting aspects of fruit is the variety available in each country.
+     </p>
+</body>
 ```
 
 ## 30.2使用DOM和事件对象
@@ -198,12 +224,51 @@
 </body>
 </html>
 ```
+- 自己重写的script部分
+```
+  <script type="text/javascript">
+        var pElems=document.getElementsByTagName("p");
+       
+        for(var i=0;i<pElems.length;i++){
+            pElems[i].addEventListener("mouseover",handleMouseOver);
+            pElems[i].addEventListener("mouseout",handleMouseOut);
+        }
+        
+        document.getElementById("pressme").onclick=function(){
+            pElems[0].removeEventListener("mouseover",handleMouseOver);
+            pElems[1].removeEventListener("mouseout",handleMouseOut);
+        }
+        
+        function handleMouseOver(e) {//参数e:它会被设成浏览器所创建的一个Event对象，用于在事件触发时代表该事件
+            e.target.style.background='white';//target属性用来获取触发事件的HTMLElement(HTML元素)
+            e.target.style.color='black';
+        }
+        function handleMouseOut(e) {
+            e.target.style.removeProperty('color');
+            e.target.style.removeProperty('background');
+        }
+    </script>
+```
+Event对象的函数和属性（即e.后面接的）***important***
+
+名称|说明|返回
+type|事件的名称（如mouseover）|字符串
+target|事件指向的元素|HTMLElement
+currentTarget|带有当前被触发事件监听器的元素|HTMLElement
+eventPhase|事件的生命周期阶段|数值
+bubbles|如果事件会在文档里冒泡，则返回true,否则false|布尔值
+cancelable|如果事件带有可撤销的默认行为则返回true,否则返回false|布尔值
+timeStamp|事件的创建时间，如果时间不可用则为0|字符串
+stopPropagation()|在当前元素的事件监听器被触发后终止事件在元素树中的流动|void
+stopImmediatePropagation()|立即终止事件在元素树中的流动。当前元素上未被触发的事件监听器会被忽略|void
+preventDefault()|防止浏览器执行与事件关联的默认操作|void
+defaultPrevented|如果调用过preventDefault()则返回true|布尔值
 
 ## 30.2.1 按类型区分事件
 - event对象（事件对象）的type属性：告诉你正在处理的是哪种类型（例如是mouseover类型呀还是mouseout类型）的事件。有了探测事件类型的能力，便可以用一个函数来处理多个类型了。
 
 ### eg:使用事件对象的type属性
-（书30-6）
+（书30-6）***Good!***
 - 本例只用handleMouseEvent这一个事件处理函数，使用type属性判断正在处理的是哪一种事件
 ```
 <!DOCTYPE html>
@@ -266,7 +331,7 @@
 - Event对象eventPhase属性：返回事件生命周期阶段。包括三个值：Event.CAPTURING PHASE(捕捉阶段）、Event.AT_TARGET（目标阶段）、Event.BUBBULING_PHASE(冒泡阶段）
 
 ### eg1:捕捉事件
-（书30-7）？？还是不太明白为何当鼠标在p上非span的部分时，事件不会被触发？此事是否target和currentTarget为一个元素（p）??
+（书30-7）***还是不太明白为何当鼠标在p上非span的部分时，事件不会被触发？此时是否target和currentTarget为一个元素（p）---应该就是这个原因***
 ```
 <!DOCTYPE html>
 
@@ -302,7 +367,7 @@
         banana.addEventListener("mouseover",handleMouseEvent);//目标元素<span>
         banana.addEventListener("mouseout",handleMouseEvent);
         textblock.addEventListener("mouseover",handleDescendantEvent,true);//body和目标元素之间的元素<p>
-         //参数true:告诉浏览器向让p元素在**触发阶段** 接收后代元素的事件
+         //参数true:告诉浏览器向让p元素在**捕捉阶段** 接收后代元素的事件
         textblock.addEventListener("mouseout",handleDescendantEvent,true);
         
         function handleDescendantEvent(e) {
@@ -333,9 +398,49 @@
 </body>
 </html>
 ```
+- 自己重写的script:
+```
+<script type="text/javascript">
+       var tarobject=document.getElementById("banana");
+       var midobject=document.getElementById("block1");
+       
+       tarobject.addEventListener("mouseover",mousefunc);
+       tarobject.addEventListener("mouseout",mousefunc);
+       
+       midobject.addEventListener("mouseover",midmousefunc,true);
+//去掉true,midmousefunc不起作用
+       midobject.addEventListener("mouseout",midmousefunc,true);
+       
+       function mousefunc(e) {
+            if (e.type=="mouseover") {
+                e.target.style.background='yellow';
+                e.target.style.color='green';
+            }
+            else if (e.type=="mouseout") {
+                e.target.style.removeProperty('background');
+                e.target.style.removeProperty('color');
+            }
+        }
+        
+        function midmousefunc(e) {
+            if (e.type=="mouseover"&&e.eventPhase==Event.CAPTURING_PHASE) {
+//去掉&&e.eventPhase==Event.CAPTURING_PHASE，其不在目标子元素捕捉阶段也能触发，能显示出'thick solid orange'
+                e.target.style.border='thick double red';
+                e.currentTarget.style.border='thick solid orange';
+            }
+            else if (e.type=="mouseout"&&e.eventPhase==Event.CAPTURING_PHASE) {
+                e.target.style.removeProperty('border');
+                e.currentTarget.style.removeProperty('border');
+            }
+           // e.stopPropagation();
+        }
+    </script>
 
+```
 ### eg2:阻止事件流前进
 (书30-8）
+- 事件捕捉让目标元素的各个上级元素都有机会在事件传递到目标元素本身之前对其作出反应。搜集元素的事件处理器可以组织事件流向目标，方法是对Event对象调用stopPropagation或stopImmediatePropagation函数。
+- ***？？还是不太懂stopPropagation和stopImmediatePropagation的区别？？***
 ```
   //修改上述代码的function handleDescendantEvent(e)
   function handleDescendantEvent(e) {
@@ -355,6 +460,7 @@
 
 ## 2.理解目标阶段
 - 目标阶段： 当捕捉阶段完成后，浏览器会触发目标元素上任何已添加的事件类型监听器
+- 目标元素的某个给定事件类型可以有多个监听器，即可以多次调用addEventListener函数
 
 ## 3.理解冒泡阶段
 - 冒泡阶段：在完成目标阶段后，浏览器开始转而沿着上级元素链朝body元素前进。在沿途的每个元素上，浏览器都会检查是否存在针对该事件类型但没有启用捕捉的监听器（即addEventListener函数第三个参数是false）
@@ -587,7 +693,21 @@
 ## 30.3使用HTML事件
 ## 30.3.2使用鼠标事件
 - 当某个鼠标事件被触发时，浏览器会指派一个MouseEvent对象
-### eg:使用MouseEvent对象响应鼠标事件
+与鼠标相关的事件
+
+名称|说明
+----|----
+click|在点击并释放鼠标时触发
+dblclick|在两次点击并释放鼠标时触发
+mousedown|在电击鼠标时触发
+mouseenter|在光标移入元素或某个后代元素所占据的屏幕区域时触发
+mouseleave|在光标移除元素或某个后代元素所占据的屏幕区域时触发
+mousemove|当光标在元素上移动时触发
+mouseout|与mouseleave基本相同
+mouseover|与mouseenter基本相同
+mouseup|在释放鼠标键时触发
+### eg:使用MouseEvent对象响应鼠标事件***Good!***
+(书30-11）
 ```
 <!DOCTYPE html>
 
@@ -657,7 +777,17 @@
 ```
 ## 30.3.3 使用键盘焦点事件
 - 与键盘焦点相关的事件触发于元素获得和失去焦点之时，FocusEvent对象代表了这些事件
-### eg:使用键盘焦点事件
+与键盘焦点相关的事件
+
+名称|说明
+----|----
+blur|在元素失去焦点时触发
+focus|在元素获得焦点时触发
+focusin|在元素即将获得焦点时触发
+focusout|在元素即将失去焦点时触发
+
+### eg:使用键盘焦点事件***Good!尤其是后面自己总结的两种script部分写法***
+(书30-12）
 ```
 <!DOCTYPE html>
 
@@ -719,8 +849,59 @@
 </body>
 </html>
 ```
+- 自己重写的script部分：方式1使用事件属性
+```
+<script type="text/javascript">
+       var inputelements=document.getElementsByTagName("input");
+       for(var i=0;i<inputelements.length;i++){
+            inputelements[i].onfocus=keyfocusfunc;
+            inputelements[i].onblur=keyfocusfunc;
+       }
+       
+       function keyfocusfunc(e) {
+            if (e.type=="focus") {
+                e.target.style.border='thick double yellow';
+                e.target.style.background='blue';
+            }
+            else if (e.type=="blur") {
+                e.target.style.removeProperty("border");
+                e.target.style.removeProperty("background");
+            }
+       }
+    </script>
+```
+- 自己重写的script部分：方式2使用addEventListener和removeEventListener函数
+```
+   <script type="text/javascript">
+       var inputelements=document.getElementsByTagName("input");
+       for(var i=0;i<inputelements.length;i++){
+            inputelements[i].addEventListener("focus",keyfocusfunc);
+            inputelements[i].addEventListener("blur",keyfocusfunc);
+       }
+       
+       function keyfocusfunc(e) {
+            if (e.type=="focus") {
+                e.target.style.border='thick double yellow';
+                e.target.style.background='blue';
+            }
+            else if (e.type=="blur") {
+                e.target.style.removeProperty("border");
+                e.target.style.removeProperty("background");
+            }
+       }
+    </script>
+```
+
 ## 30.3.4 使用键盘事件
 - 键盘事件由按键操作触发，KeyboardEvent对象代表了这些事件
+与键盘相关的事件
+
+名称|说明
+----|----
+keydown|用户按下某个按键时触发
+keypress|在用户按下并释放某个按键时触发
+keyup|在用户释放某个键时触发
+
 ### eg:使用键盘事件
 (书30-13）
 ```
@@ -778,4 +959,19 @@
 </body>
 </html>
 ```
-
+- 自己重写的script部分另一种写法
+```
+   <script type="text/javascript">
+        var inputElems=document.getElementsByTagName("input");
+        for(var i=0;i<inputElems.length;i++){
+           inputElems[i].addEventListener("keydown",handleKeyboardEvent,false);//keyup事件：在用户释放某个键时触发
+        }
+        
+        function handleKeyboardEvent(e) {
+            if (e.eventPhase==Event.AT_TARGET) {
+                document.getElementById("message").innerHTML="Key pressed:"+e.keycode+" Char:"+String.fromCharCode(e.keyCode);
+            }
+            //keyCode属性：获取按下按键的unicode值  String.fromCharCode()函数：将该值转变为字符
+        }
+    </script>
+```
